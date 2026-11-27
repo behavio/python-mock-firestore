@@ -13,14 +13,11 @@ setuptools.setup(
     url="https://github.com/mdowds/mock-firestore",
     packages=setuptools.find_packages(),
     test_suite='',
+    python_requires='>=3.12',
     classifiers=[
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
         "License :: OSI Approved :: MIT License",
     ],
 )

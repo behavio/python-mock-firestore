@@ -1,0 +1,22 @@
+name: "Publish mock-firestore"
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  test:
+    uses: ./.github/workflows/test.yml
+
+  # Fails unless the tag, minus `v`, equals the version in setup.py.
+  publish:
+    needs: test
+    uses: behavio/gh-workflows/.github/workflows/do-publish-library.yml@v1
+    with:
+      tag: ${{ github.ref_name }}
+      tag_prefix: v
+      source_dir: .
+    secrets:
+      build_bot_sa: ${{ secrets.build_bot_sa }}
