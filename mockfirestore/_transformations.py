@@ -49,7 +49,7 @@ def apply_transformations(document: Dict[str, Any], data: Dict[str, Any]):
             except (TypeError, KeyError):
                 item = default
 
-            set_by_path(data, path, item + value, create_nested=True)
+            data[key] = item + value
 
     _update_data(increments, 0)
     _update_data(arr_unions, [])

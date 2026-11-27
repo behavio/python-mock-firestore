@@ -67,11 +67,24 @@ def get_document_iterator(document: Dict[str, Any], prefix: str = '') -> Iterato
     :returns: (dot-delimited path, value,)
     """
     for key, value in document.items():
+        path = '{}.{}'.format(prefix, key) if prefix else key
         if isinstance(value, dict):
-            for item in get_document_iterator(value, prefix=key):
+            for item in get_document_iterator(value, prefix=path):
                 yield item
 
-        if not prefix:
-            yield key, value
+        yield path, value
+
+
+def get_field_paths(document: Dict[str, Any], prefix: str = '') -> Dict[str, Any]:
+    """
+    :returns: {dot-delimited path: value} for every leaf; a non-empty map is
+        not a leaf, so writing the result merges into nested maps.
+    """
+    paths = {}
+    for key, value in document.items():
+        path = '{}.{}'.format(prefix, key) if prefix else key
+        if isinstance(value, dict) and value:
+            paths.update(get_field_paths(value, prefix=path))
         else:
-            yield '{}.{}'.format(prefix, key), value
+            paths[path] = value
+    return paths

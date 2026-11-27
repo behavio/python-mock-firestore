@@ -111,6 +111,41 @@ class TestDocumentReference(TestCase):
         doc = fs.collection('foo').document('first').get().to_dict()
         self.assertEqual({'updated': True}, doc)
 
+    def test_document_set_mergeNestedMaps(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1, 'stats': {'global': {'opened': 5, 'finished': 2}}}
+        }}
+        fs.collection('foo').document('first').set(
+            {'stats': {'global': {'opened': 6}, 'new': True}}, merge=True
+        )
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual(
+            {'id': 1, 'stats': {'global': {'opened': 6, 'finished': 2}, 'new': True}},
+            doc,
+        )
+
+    def test_document_set_mergeNestedIncrement(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'stats': {'global': {'opened': 5, 'finished': 2}}}
+        }}
+        fs.collection('foo').document('first').set(
+            {'stats': {'global': {'opened': firestore.Increment(1)}}}, merge=True
+        )
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual({'stats': {'global': {'opened': 6, 'finished': 2}}}, doc)
+
+    def test_document_set_mergeNestedIncrementForNonExistentDoc(self):
+        fs = MockFirestore()
+        fs.collection('foo').document('first').set(
+            {'stats': {'global': {'opened': firestore.Increment(1),
+                                  'finished': firestore.Increment(0)}}},
+            merge=True,
+        )
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual({'stats': {'global': {'opened': 1, 'finished': 0}}}, doc)
+
     def test_document_set_overwriteValue(self):
         fs = MockFirestore()
         fs._data = {'foo': {
@@ -193,6 +228,18 @@ class TestDocumentReference(TestCase):
             'nested': {'count': 0},
             'other': {'likes': 1, 'smoked': 'salmon'}
         })
+
+    def test_document_update_transformerIncrementFieldPath(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'stats': {'global': {'opened': 5, 'finished': 2}}}
+        }}
+        fs.collection('foo').document('first').update(
+            {'stats.global.opened': firestore.Increment(1)}
+        )
+
+        doc = fs.collection('foo').document('first').get().to_dict()
+        self.assertEqual(doc, {'stats': {'global': {'opened': 6, 'finished': 2}}})
 
     def test_document_update_transformerIncrementNonExistent(self):
         fs = MockFirestore()

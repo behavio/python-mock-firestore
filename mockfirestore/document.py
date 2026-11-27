@@ -4,7 +4,8 @@ import operator
 from typing import List, Dict, Any
 from mockfirestore import NotFound
 from mockfirestore._helpers import (
-    Timestamp, Document, Store, get_by_path, set_by_path, delete_by_path
+    Timestamp, Document, Store, get_by_path, get_field_paths, set_by_path,
+    delete_by_path,
 )
 from mockfirestore._transformations import apply_transformations
 
@@ -71,10 +72,8 @@ class DocumentReference:
 
     def set(self, data: Dict, merge=False):
         if merge:
-            try:
-                self.update(deepcopy(data))
-            except NotFound:
-                self.set(data)
+            document = get_by_path(self._data, self._path, create_nested=True)
+            apply_transformations(document, get_field_paths(deepcopy(data)))
         else:
             set_by_path(self._data, self._path, deepcopy(data))
 
